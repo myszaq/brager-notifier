@@ -3,3 +3,5 @@
 /workspace.xml
 /.idea/
 /logs/app_execution.log
+secrets.py
+config.yml
