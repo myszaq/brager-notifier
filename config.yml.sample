@@ -1,0 +1,32 @@
+# This is a sample of config.yml file which contains the configuration for the whole app. In order to use it you just need to create
+# the copy of this file under config.yml name and update recipients in Router section. Other parameters have their default values.
+Brager:
+  brager_url: "https://one.brager.pl/"
+  user_object: "Dom"
+  module_name: "Piec"
+  low_fuel_level: 25
+  critical_fuel_level: 15
+  low_fuel_level_message: |
+    Witaj {0}! Poziom paliwa w zasobniku kotła spadł do {1}%! Uzupełnij proszę pellet jak najszybciej.
+    Temperatura kotła: {2}
+    Status kotła: {3}
+    Brager Notifier v.1.0.
+  critical_fuel_level_message: |
+    Witaj {0}! Zostało tylko {1}% paliwa w zasobniku! Musisz natychmiast uzupełnić pellet, w przeciwnym razie dojdzie do zatrzymania pracy kotła.
+    Temperatura kotła: {2}
+    Status kotła: {3}
+    Brager Notifier v.1.0.
+  full_fuel_level_message: |
+    Witaj {0}! Gratuluję, wygląda na to, że poziom pelletu został niedawno uzupełniony do 100%. Nic nie musisz robić :)
+    Temperatura kotła: {1}
+    Status kotła: {2}
+    Brager Notifier v.1.0.
+Router:
+  router_url: "http://192.168.8.1/html/index.html"
+  recipients:
+    - name: "Stefan"
+      phone_number: "111111111"
+    - name: "Barbara"
+      phone_number: "222222222"
+    - name: "Operator kotła"
+      phone_number: "333333333"
