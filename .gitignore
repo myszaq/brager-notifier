@@ -5,4 +5,5 @@
 /logs/app_execution.log
 secrets.py
 config.yml
-data/persistence.json
+/data/persistence.json
+/tests/logs/app_execution.log
