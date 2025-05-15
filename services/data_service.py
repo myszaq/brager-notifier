@@ -28,6 +28,7 @@ class DataService:
 
     def save_data_file(self):
         json_object = json.dumps(self.file_content, indent=4)
+        os.makedirs(os.path.dirname(self.json_file_path), exist_ok=True)
         with open(self.json_file_path, "w") as output_file:
             output_file.write(json_object)
 
