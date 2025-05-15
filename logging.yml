@@ -10,7 +10,7 @@ handlers:
     formatter: simple
     stream: ext://sys.stdout
   file:
-      class: logging.handlers.RotatingFileHandler
+      class: utils.safe_rotating_file_handler.SafeRotatingFileHandler
       level: DEBUG
       formatter: simple
       filename: logs/app_execution.log
