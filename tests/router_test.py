@@ -37,6 +37,8 @@ class RouterTest(BaseCase):
         else:
             print("Sending sms unfortunately failed for some reason.")
 
+        self.assert_true(status)
+
     @pytest.mark.skip
     def test_sending_message(self):
         for i in range(10):
