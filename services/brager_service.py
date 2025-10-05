@@ -42,14 +42,16 @@ class BragerService:
             try:
                 self.login_page.proceed_to_login(sb)
                 self.login_page.login_user(sb, self.email, self.password)
+                logger.info(f"User {self.email} has logged in successfully.")
             except Exception as e:
                 logger.error(f"Could not login user {self.email}! Exception: %s", e, exc_info=True)
                 raise
 
             try:
                 self.login_page.choose_object(sb, self.object_name)
+                logger.info(f"Object {self.object_name} has been selected successfully.")
             except Exception as e:
-                logger.error(f"Could not choose object {self.object_name}! Exception: %s", e, exc_info=True)
+                logger.error(f"Could not select object {self.object_name}! Exception: %s", e, exc_info=True)
                 raise
 
             try:
