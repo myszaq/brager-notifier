@@ -4,10 +4,10 @@ from seleniumbase import BaseCase
 
 class LoginPage:
     page_title: str = "h1.pageTitle"
-    email_container: str = "//input[@id='input-3']/.."
-    email_field: str = "#input-3"
-    password_container: str = "//input[@id='input-5']/.."
-    password_field: str = "#input-5"
+    email_container: str = "//input[@id='input-v-3']/.."
+    email_field: str = "#input-v-3"
+    password_container: str = "//input[@id='input-v-5']/.."
+    password_field: str = "#input-v-5"
     login_button: str = "//button[contains(., 'Zaloguj')]"
     next_button: str = "//button[contains(., 'Dalej')]"
     choose_object_dropdown: str = "//label[text()='Wybierz obiekt']/.."

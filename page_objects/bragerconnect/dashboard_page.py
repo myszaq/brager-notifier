@@ -2,7 +2,7 @@ from seleniumbase import BaseCase
 
 
 class DashboardPage:
-    main_panel_link: str = "div.iNavigationDrawer a.router-link-active"
+    main_panel_link: str = "nav.v-navigation-drawer a.router-link-active"
     card_title: str = ".v-card-title"
     logout_button: str = "//div[@class='text'][contains(., 'Wyloguj')]/.."
     confirm_button: str = "//button[contains(., 'Potwierdź')]"
