@@ -17,12 +17,12 @@ class RouterService:
 
     def execute(self, message: str, phone_number: str):
         try:
-            self.send_message(message, phone_number)
+            self._send_message(message, phone_number)
         # slightly ugly solution to avoid throwing a bunch of exceptions from SB context manager
         except (RuntimeError, Exception):
             pass
 
-    def send_message(self, message: str, phone_number: str):
+    def _send_message(self, message: str, phone_number: str):
         logger.info(f"Sending SMS with the content: {message}")
         with SB(browser="chrome", maximize=True, headless=True) as sb:
             # actual timeout will be twice as much (30 seconds) due to the retry in SeleniumBase
