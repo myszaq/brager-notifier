@@ -1,5 +1,6 @@
 import json
 import os
+
 from utils.config_provider import PROJECT_ROOT_DIR
 
 
@@ -8,23 +9,22 @@ class DataService:
     file_content: dict = None
 
     def __init__(self):
-        if self.data_file_exists():
-            self.read_data_file()
+        if self._data_file_exists():
+            self._read_data_file()
         else:
             # create template for output json without any data
+            browser_storage = {
+                "selectedObjectId": 0,
+                "accessToken": "",
+                "refreshToken": ""
+            }
             self.file_content = {
                 "last_read_date": "",
                 "last_fuel_level": 0,
-                "fuel_refill_dates": []
+                "fuel_refill_dates": [],
+                "browser_storage": browser_storage
             }
             self.save_data_file()
-
-    def data_file_exists(self) -> bool:
-        return os.path.exists(self.json_file_path)
-
-    def read_data_file(self):
-        with open(self.json_file_path, "r") as input_file:
-            self.file_content = json.load(input_file)
 
     def save_data_file(self):
         json_object = json.dumps(self.file_content, indent=4)
@@ -48,8 +48,23 @@ class DataService:
     def set_last_fuel_level(self, last_fuel_level: int):
         self.file_content["last_fuel_level"] = last_fuel_level
 
+    def get_browser_storage(self) -> dict | None:
+        if "browser_storage" in self.file_content:
+            return self.file_content["browser_storage"]
+        return None
+
+    def set_browser_storage(self, browser_storage: dict):
+        self.file_content["browser_storage"] = browser_storage
+
     def save_fuel_refill_date(self, refill_date: str):
         if "fuel_refill_dates" in self.file_content:
             self.file_content["fuel_refill_dates"].append(refill_date)
         else:
             self.file_content["fuel_refill_dates"] = [refill_date]
+
+    def _read_data_file(self):
+        with open(self.json_file_path, "r") as input_file:
+            self.file_content = json.load(input_file)
+
+    def _data_file_exists(self) -> bool:
+        return os.path.exists(self.json_file_path)
