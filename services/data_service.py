@@ -20,9 +20,11 @@ class DataService:
             }
             self.file_content = {
                 "last_read_date": "",
+                "last_sms_date": "",
                 "last_fuel_level": 0,
                 "fuel_refill_dates": [],
-                "browser_storage": browser_storage
+                "browser_storage": browser_storage,
+                "last_mail_date": ""
             }
             self.save_data_file()
 
@@ -39,6 +41,21 @@ class DataService:
 
     def set_last_read_date(self, last_read_date: str):
         self.file_content["last_read_date"] = last_read_date
+
+    def get_last_sms_date(self) -> str | None:
+        if "last_sms_date" in self.file_content:
+            return self.file_content["last_sms_date"]
+        return None
+
+    def set_last_sms_date(self, last_sms_date: str):
+        self.file_content["last_sms_date"] = last_sms_date
+
+    def get_last_mail_date(self) -> str | None:
+        if "last_mail_date" in self.file_content:
+            return self.file_content["last_mail_date"]
+
+    def set_last_mail_date(self, last_mail_date: str):
+        self.file_content["last_mail_date"] = last_mail_date
 
     def get_last_fuel_level(self) -> int | None:
         if "last_fuel_level" in self.file_content:
