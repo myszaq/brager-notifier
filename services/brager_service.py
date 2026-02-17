@@ -1,9 +1,20 @@
 import base64
 
-from seleniumbase import SB
+from seleniumbase import BaseCase, SB
+
 import secrets
+from model.boiler_data import BoilerData
+from model.burner_data import BurnerData
+from model.device_data import DeviceData
+from model.dhw_data import DHWData
+from model.fuel_data import FuelData
+from model.return_data import ReturnData
+from model.valve_data import ValveData
+from page_objects.bragerconnect.components_page import BoilerPage, BurnerPage, DHWPage, FeederPage, ValvePage
 from page_objects.bragerconnect.dashboard_page import DashboardPage
 from page_objects.bragerconnect.login_page import LoginPage
+from page_objects.bragerconnect.modules_page import ModulesPage
+from services.login_service import LoginService
 from utils.config_provider import ConfigProvider
 from utils.logger import logger
 
@@ -11,6 +22,7 @@ from utils.logger import logger
 class BragerService:
     login_page = LoginPage()
     dashboard_page = DashboardPage()
+    modules_page = ModulesPage()
 
     page_url = ConfigProvider.get_brager_config_option("brager_url")
     object_name = ConfigProvider.get_brager_config_option("user_object")
@@ -21,55 +33,115 @@ class BragerService:
     boiler_status = None
     boiler_temperature = None
 
-    def execute(self) -> bool:
-        try:
-            self.collect_boiler_data()
-            return True
-        except (RuntimeError, Exception):
-            return False
-
-    def collect_boiler_data(self):
+    def collect_device_data(self) -> DeviceData:
         logger.info("Connecting to BragerOne application.")
-        with SB(browser="chrome", maximize=True, headless=True) as sb:
+        with SB(browser="chrome", maximize=True, headless=False) as sb:
             # actual timeout will be twice as much (30 seconds) due to the retry in SeleniumBase
             sb.driver.set_page_load_timeout(15)
-            try:
-                sb.open(self.page_url)
-            except Exception as e:
-                logger.error(f"Could not open page {self.page_url}! Exception: %s", e)
-                raise
 
             try:
-                self.login_page.proceed_to_login(sb)
-                self.login_page.login_user(sb, self.email, self.password)
-                logger.info(f"User {self.email} has logged in successfully.")
-            except Exception as e:
-                logger.error(f"Could not login user {self.email}! Exception: %s", e, exc_info=True)
-                raise
+                try:
+                    sb.open(self.page_url)
+                except Exception as e:
+                    logger.error(f"Could not open page {self.page_url}! Exception: %s", e)
+                    raise
 
-            try:
-                self.login_page.choose_object(sb, self.object_name)
-                logger.info(f"Object {self.object_name} has been selected successfully.")
-            except Exception as e:
-                logger.error(f"Could not select object {self.object_name}! Exception: %s", e, exc_info=True)
-                raise
-
-            try:
+                login_service = LoginService()
+                login_service.brager_login(sb)
                 self.dashboard_page.wait_for_dashboard_loaded(sb, self.module_name)
                 self.fuel_level = self.dashboard_page.get_fuel_level(sb)
                 self.boiler_status = self.dashboard_page.get_boiler_status(sb)
                 self.boiler_temperature = self.dashboard_page.get_boiler_temperature(sb)
+
+                # collect available data from the dashboard
+                boiler_data = self._get_basic_boiler_data(sb)
+                return_data = self._get_return_data(sb)
+                burner_data = self._get_burner_data(sb)
+                fuel_data = self._get_basic_fuel_data(sb)
+
+                # the remaining data require opening specific components pages
+                self.modules_page.open_components_page(sb)
+
+                boiler_data = self._get_remaining_boiler_data(sb, boiler_data)
+                valve_data = self._get_valve_data(sb)
+                dhw_data = self._get_dhw_data(sb)
+                fuel_data = self._get_remaining_fuel_data(sb, fuel_data)
+
                 self.dashboard_page.logout(sb)
+
+                logger.info("Device data has been read and collected successfully.")
+                return DeviceData(
+                    boiler=boiler_data,
+                    valve=valve_data,
+                    dhw=dhw_data,
+                    flow_return=return_data,
+                    burner=burner_data,
+                    fuel=fuel_data
+                )
             except Exception as e:
-                logger.error("Could not collect any data from the boiler! Exception: %s", e, exc_info=True)
+                logger.error("Could not collect device data from Brager page! Exception: %s", e, exc_info=True)
+                sb.save_screenshot("error_screenshot.png", "logs")
                 raise
-        logger.info("Boiler data has been read and collected successfully.")
 
-    def get_fuel_level(self) -> int:
-        return self.fuel_level
+    def _get_basic_boiler_data(self, sb: BaseCase) -> BoilerData:
+        temperature = self.dashboard_page.get_boiler_temperature(sb)
+        setting = self.dashboard_page.get_boiler_setting(sb)
+        status = self.dashboard_page.get_boiler_status(sb)
+        pump_status = self.dashboard_page.get_boiler_pump_status(sb)
 
-    def get_boiler_status(self) -> str:
-        return self.boiler_status
+        return BoilerData(boiler_temperature=temperature, boiler_setting=setting, boiler_status=status, boiler_pump_status=pump_status)
 
-    def get_boiler_temperature(self) -> str:
-        return self.boiler_temperature
+    def _get_remaining_boiler_data(self, sb: BaseCase, boiler_data: BoilerData) -> BoilerData:
+        boiler_page = BoilerPage(sb)
+        outdoor_temperature = boiler_page.get_outdoor_temperature(sb)
+        boiler_data.outdoor_temperature = outdoor_temperature
+
+        return boiler_data
+
+    def _get_valve_data(self, sb: BaseCase):
+        valve_page = ValvePage(sb)
+        temperature = valve_page.get_valve_temperature(sb)
+        setting = valve_page.get_valve_setting(sb)
+        pump_status = valve_page.get_valve_pump_status(sb)
+        oper_mode = valve_page.get_valve_operating_mode(sb)
+
+        return ValveData(valve_temperature=temperature, valve_setting=setting, valve_pump_status=pump_status,
+                         valve_operating_mode=oper_mode)
+
+    def _get_dhw_data(self, sb: BaseCase) -> DHWData:
+        dhw_page = DHWPage(sb)
+        temperature = dhw_page.get_dhw_temperature(sb)
+        setting = dhw_page.get_dhw_setting(sb)
+        pump_status = dhw_page.get_dhw_pump_status(sb)
+        oper_mode = dhw_page.get_dhw_operating_mode(sb)
+
+        return DHWData(dhw_temperature=temperature, dhw_setting=setting, dhw_pump_status=pump_status, dhw_operating_mode=oper_mode)
+
+    def _get_return_data(self, sb: BaseCase) -> ReturnData:
+        temperature = self.dashboard_page.get_return_temperature(sb)
+        pump_status = self.dashboard_page.get_return_pump_status(sb)
+
+        return ReturnData(return_temperature=temperature, return_pump_status=pump_status)
+
+    def _get_burner_data(self, sb: BaseCase) -> BurnerData:
+        power = self.dashboard_page.get_burner_power(sb)
+        flame_brightness = self.dashboard_page.get_flame_brightness(sb)
+        blower_efficiency = self.dashboard_page.get_blower_efficiency(sb)
+
+        return BurnerData(burner_power=power, flame_brightness=flame_brightness, blower_efficiency=blower_efficiency)
+
+    def _get_basic_fuel_data(self, sb: BaseCase) -> FuelData:
+        fuel_level = self.dashboard_page.get_fuel_level(sb)
+
+        return FuelData(fuel_level=fuel_level)
+
+    def _get_remaining_fuel_data(self, sb: BaseCase, fuel_data: FuelData) -> FuelData:
+        feeder_page = FeederPage(sb)
+        fuel_amount = feeder_page.get_burned_fuel_amount(sb)
+
+        burner_page = BurnerPage(sb)
+        fuel_in_24h = burner_page.get_burned_fuel_in_24h(sb)
+
+        fuel_data.burned_fuel_amount = fuel_amount
+        fuel_data.burned_fuel_in_24h = fuel_in_24h
+        return fuel_data
