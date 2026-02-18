@@ -1,6 +1,11 @@
+import traceback
 from dataclasses import dataclass
+
+from model.notification_data import NotificationData
 from services.brager_service import BragerService
 from services.data_service import DataService
+from services.email_service import EmailService
+from services.notification_service import NotificationService
 from services.router_service import RouterService
 from utils import date_utils
 from utils.config_provider import ConfigProvider
@@ -25,63 +30,29 @@ class Controller:
     recipients_list = ConfigProvider.get_router_config_option("recipients")
 
     def execute(self):
-        is_refilled = False
-        brager_data = self.get_brager_data()
-        if brager_data is None:
-            return
-
-        logger.info(f"Current fuel level: {brager_data.fuel_level}%. "
-                    f"Boiler temperature: {brager_data.boiler_temperature}. "
-                    f"Boiler status: {brager_data.boiler_status}.")
-        if self.low_fuel_level >= brager_data.fuel_level > self.critical_fuel_level:
-            logger.info(f"Detected low fuel level: {brager_data.fuel_level}%! A corresponding message will be sent.")
-            self.send_low_fuel_level_message(brager_data)
-        elif brager_data.fuel_level <= self.critical_fuel_level:
-            logger.info(f"Detected critical fuel level: {brager_data.fuel_level}%! A corresponding message will be sent.")
-            self.send_critical_fuel_level_message(brager_data)
-        elif brager_data.fuel_level == self.full_fuel_level and self.data_service.get_last_fuel_level() != self.full_fuel_level:
-            logger.info("Detected recent fuel refill. A corresponding message will be sent.")
-            self.send_full_fuel_level_message(brager_data)
-            is_refilled = True
-        else:
-            logger.info("Fuel is on optimal level. There is nothing left to do.")
-
-        self.data_service.set_last_read_date(date_utils.get_current_date_time())
-        self.data_service.set_last_fuel_level(brager_data.fuel_level)
-        if is_refilled:
-            self.data_service.save_fuel_refill_date(date_utils.get_current_date_time())
-        self.data_service.save_data_file()
-
-    def get_brager_data(self) -> BragerData | None:
-        if self.brager_service.execute():
-            fuel_level = self.brager_service.get_fuel_level()
-            boiler_status = self.brager_service.get_boiler_status()
-            boiler_temperature = self.brager_service.get_boiler_temperature()
-            return BragerData(fuel_level, boiler_status, boiler_temperature)
-        else:
-            logger.error("Could not collect boiler data! Please check error log for details.")
-            return None
-
-    def send_low_fuel_level_message(self, brager_data: BragerData):
-        low_fuel_message_tpl: str = ConfigProvider.get_brager_config_option("low_fuel_level_message").strip()
-        for recipient in self.recipients_list:
-            low_fuel_message = low_fuel_message_tpl.format(
-                recipient["name"], brager_data.fuel_level, brager_data.boiler_temperature, brager_data.boiler_status
+        try:
+            device_data = self.brager_service.collect_device_data()
+            notification_data = NotificationData(
+                fuel_level=device_data.fuel.fuel_level,
+                boiler_status=device_data.boiler.boiler_status,
+                boiler_temperature=device_data.boiler.boiler_temperature
             )
-            self.router_service.execute(low_fuel_message, recipient["phone_number"])
+            logger.info(f"Current fuel level: {notification_data.fuel_level}%. "
+                        f"Boiler temperature: {notification_data.boiler_temperature}°C. "
+                        f"Boiler status: {notification_data.boiler_status}.")
+            self.data_service.set_last_read_date(date_utils.get_current_datetime())
+            self.data_service.set_last_fuel_level(notification_data.fuel_level)
+            self.data_service.save_data_file()
 
-    def send_critical_fuel_level_message(self, brager_data: BragerData):
-        critical_fuel_message_tpl = ConfigProvider.get_brager_config_option("critical_fuel_level_message").strip()
-        for recipient in self.recipients_list:
-            critical_fuel_message = critical_fuel_message_tpl.format(
-                recipient["name"], brager_data.fuel_level, brager_data.boiler_temperature, brager_data.boiler_status
-            )
-            self.router_service.execute(critical_fuel_message, recipient["phone_number"])
+            NotificationService().set_notification_data(notification_data).send_sms_notification()
+        except (RuntimeError, Exception) as e:
+            logger.error("An error occurred during the execution of the program. Exception: %s", e, exc_info=True)
+            self._handle_error()
 
-    def send_full_fuel_level_message(self, brager_data: BragerData):
-        full_fuel_message_tpl = ConfigProvider.get_brager_config_option("full_fuel_level_message").strip()
-        for recipient in self.recipients_list:
-            critical_fuel_message = full_fuel_message_tpl.format(
-                recipient["name"], brager_data.boiler_temperature, brager_data.boiler_status
-            )
-            self.router_service.execute(critical_fuel_message, recipient["phone_number"])
+    def _handle_error(self):
+        (EmailService()
+         .set_screenshot_path("logs/error_screenshot.png")
+         .set_attachment_path("logs/app_execution.log")
+         .set_error_log(traceback.format_exc())
+         .send_email()
+         )
