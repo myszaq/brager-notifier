@@ -4,6 +4,7 @@
 /.idea/
 __pycache__
 /logs/app_execution.log
+/logs/error_screenshot.png
 secrets.py
 config.yml
 /data/persistence.json
