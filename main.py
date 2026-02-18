@@ -2,6 +2,6 @@ from services.controller import Controller
 from utils.logger import logger
 
 if __name__ == "__main__":
-    logger.info("BragerNotifier app started.")
+    logger.info("BragerReportingTool app started.")
     Controller().execute()
-    logger.info("BragerNotifier app finished.")
+    logger.info("BragerReportingTool app finished.")
