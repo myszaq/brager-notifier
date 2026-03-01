@@ -1,4 +1,4 @@
-from model.enums.notification_type import FuelNotificationType
+from model.enums.fuel_notification_type import FuelNotificationType
 from model.notification_data import NotificationData
 from services.app_data_service import AppDataService
 from services.router_service import RouterService

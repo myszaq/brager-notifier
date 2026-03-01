@@ -2,7 +2,7 @@ import json
 import os
 
 from model.enums.error_type import ErrorType
-from model.enums.notification_type import FuelNotificationType
+from model.enums.fuel_notification_type import FuelNotificationType
 from utils.config_provider import PROJECT_ROOT_DIR
 
 
