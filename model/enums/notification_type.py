@@ -1,7 +1,7 @@
-import enum
+from enum import StrEnum
 
 
-class NotificationType(enum.StrEnum):
+class FuelNotificationType(StrEnum):
     LOW_FUEL = "low_fuel"
     CRITICAL_FUEL = "critical_fuel"
     REFILL_FUEL = "refill_fuel"

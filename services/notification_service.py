@@ -1,4 +1,4 @@
-from model.enums.notification_type import NotificationType
+from model.enums.notification_type import FuelNotificationType
 from model.notification_data import NotificationData
 from services.data_service import DataService
 from services.router_service import RouterService
@@ -17,7 +17,7 @@ class NotificationService:
     recipients_list = ConfigProvider.get_router_config_option("recipients")
     # time interval expressed in hours
     notification_time_interval: int = ConfigProvider.get_brager_config_option("notification_time_interval")
-    warning_notification_types = [NotificationType.LOW_FUEL, NotificationType.CRITICAL_FUEL]
+    warning_notification_types = [FuelNotificationType.LOW_FUEL, FuelNotificationType.CRITICAL_FUEL]
 
     def __init__(self):
         self._notification_data = None
@@ -34,27 +34,28 @@ class NotificationService:
         if not self._should_send_sms(notification_type):
             return
 
+        current_datetime = date_utils.get_current_datetime()
+        if notification_type == FuelNotificationType.REFILL_FUEL:
+            self.data_service.save_fuel_refill_date(current_datetime)
+
         is_sms_sent = False
         match notification_type:
-            case NotificationType.LOW_FUEL:
+            case FuelNotificationType.LOW_FUEL:
                 self._send_low_fuel_level_message(self._notification_data)
                 is_sms_sent = True
-            case NotificationType.CRITICAL_FUEL:
+            case FuelNotificationType.CRITICAL_FUEL:
                 self._send_critical_fuel_level_message(self._notification_data)
                 is_sms_sent = True
-            case NotificationType.REFILL_FUEL:
+            case FuelNotificationType.REFILL_FUEL:
                 self._send_full_fuel_level_message(self._notification_data)
                 is_sms_sent = True
 
-        current_datetime = date_utils.get_current_datetime()
-        if notification_type == NotificationType.REFILL_FUEL:
-            self.data_service.save_fuel_refill_date(current_datetime)
         if is_sms_sent:
             self.data_service.set_last_sms_date(current_datetime)
         self.data_service.set_last_notification_type(notification_type)
         self.data_service.save_data_file()
 
-    def _should_send_sms(self, current_notification_type: NotificationType) -> bool:
+    def _should_send_sms(self, current_notification_type: FuelNotificationType) -> bool:
         last_sms_date = self.data_service.get_last_sms_date()
         last_notification_type = self.data_service.get_last_notification_type()
         if not last_sms_date or not last_notification_type:
@@ -72,16 +73,16 @@ class NotificationService:
 
         return False
 
-    def _get_notification_type(self) -> NotificationType:
+    def _get_notification_type(self) -> FuelNotificationType:
         current_fuel_level = self._notification_data.fuel_level
         if self.low_fuel_level >= current_fuel_level > self.critical_fuel_level:
-            return NotificationType.LOW_FUEL
+            return FuelNotificationType.LOW_FUEL
         elif current_fuel_level <= self.critical_fuel_level:
-            return NotificationType.CRITICAL_FUEL
+            return FuelNotificationType.CRITICAL_FUEL
         elif current_fuel_level == self.full_fuel_level:
-            return NotificationType.REFILL_FUEL
+            return FuelNotificationType.REFILL_FUEL
         else:
-            return NotificationType.OK_FUEL
+            return FuelNotificationType.OK_FUEL
 
     def _send_low_fuel_level_message(self, notification_data: NotificationData):
         logger.info(f"Detected low fuel level: {notification_data.fuel_level}%! A corresponding message will be sent.")
