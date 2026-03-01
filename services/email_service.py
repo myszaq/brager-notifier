@@ -8,14 +8,14 @@ from smtplib import SMTPException
 
 import secrets
 from model.enums.error_type import ErrorType
-from services.data_service import DataService
+from services.app_data_service import AppDataService
 from utils import date_utils
 from utils.config_provider import ConfigProvider
 from utils.logger import logger
 
 
 class EmailService:
-    data_service = DataService()
+    data_service = AppDataService()
 
     mail_from: str = ConfigProvider.get_mailer_config_option("mail_from")
     mail_from_name: str = ConfigProvider.get_mailer_config_option("mail_from_name")

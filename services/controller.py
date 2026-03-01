@@ -6,7 +6,7 @@ import mariadb
 from model.enums.error_type import ErrorType
 from model.notification_data import NotificationData
 from services.brager_service import BragerService
-from services.data_service import DataService
+from services.app_data_service import AppDataService
 from services.db_service import DBService
 from services.email_service import EmailService
 from services.notification_service import NotificationService
@@ -26,7 +26,7 @@ class BragerData:
 class Controller:
     brager_service = BragerService()
     router_service = RouterService()
-    data_service = DataService()
+    data_service = AppDataService()
     db_service = DBService()
 
     full_fuel_level = 100

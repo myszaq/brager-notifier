@@ -5,7 +5,7 @@ from seleniumbase import BaseCase
 import secrets
 from page_objects.bragerconnect.common_page import CommonPage
 from page_objects.bragerconnect.login_page import LoginPage
-from services.data_service import DataService
+from services.app_data_service import AppDataService
 from utils.config_provider import ConfigProvider
 from utils.logger import logger
 
@@ -13,7 +13,7 @@ from utils.logger import logger
 class LoginService:
     common_page = CommonPage()
     login_page = LoginPage()
-    data_service = DataService()
+    data_service = AppDataService()
 
     object_name = ConfigProvider.get_brager_config_option("user_object")
     module_name = ConfigProvider.get_brager_config_option("module_name")

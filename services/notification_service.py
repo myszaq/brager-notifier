@@ -1,6 +1,6 @@
 from model.enums.notification_type import FuelNotificationType
 from model.notification_data import NotificationData
-from services.data_service import DataService
+from services.app_data_service import AppDataService
 from services.router_service import RouterService
 from utils import date_utils
 from utils.config_provider import ConfigProvider
@@ -9,7 +9,7 @@ from utils.logger import logger
 
 class NotificationService:
     router_service = RouterService()
-    data_service = DataService()
+    data_service = AppDataService()
 
     full_fuel_level = 100
     low_fuel_level = ConfigProvider.get_brager_config_option("low_fuel_level")
