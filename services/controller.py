@@ -37,7 +37,13 @@ class Controller:
     def execute(self):
         try:
             last_fuel_level = self.data_service.get_last_fuel_level()
-            device_data = self.brager_service.collect_device_data()
+            # get all device data from Brager application
+            try:
+                device_data = self.brager_service.collect_device_data()
+            except (RuntimeError, Exception):
+                self._handle_error(ErrorType.READ_DATA_ERROR)
+                raise
+
             notification_data = NotificationData(
                 fuel_level=device_data.fuel.fuel_level,
                 boiler_status=device_data.boiler.boiler_status,
@@ -52,14 +58,15 @@ class Controller:
 
             previous_full_level = last_fuel_level if (device_data.fuel.fuel_level == 100 and last_fuel_level != 100) else None
             # save the content of device_data to DB
-            self.db_service.save_device_data(device_data, previous_full_level)
+            try:
+                self.db_service.save_device_data(device_data, previous_full_level)
+            except (mariadb.Error, Exception):
+                self._handle_error(ErrorType.SAVE_DATA_ERROR)
+                raise
+
             NotificationService().set_notification_data(notification_data).send_sms_notification()
-        except mariadb.Error as e:
+        except Exception as e:
             logger.error("An error occurred during the execution of the program. Exception: %s", e, exc_info=True)
-            self._handle_error(ErrorType.SAVE_DATA_ERROR)
-        except (RuntimeError, Exception) as e:
-            logger.error("An error occurred during the execution of the program. Exception: %s", e, exc_info=True)
-            self._handle_error(ErrorType.READ_DATA_ERROR)
 
     def _handle_error(self, error_type: ErrorType):
         email_service = EmailService()
