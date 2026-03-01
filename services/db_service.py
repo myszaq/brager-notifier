@@ -44,7 +44,8 @@ class DBService:
             logger.debug("Device data has been successfully stored in the database. Measurement id: %d", measurement_id)
         except mariadb.Error as e:
             logger.error("Could not save device data into database! Exception: %s", e, exc_info=True)
-            self.conn.rollback()
+            if self.conn:
+                self.conn.rollback()
             raise
 
         finally:
