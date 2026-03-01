@@ -1,7 +1,8 @@
 import json
 import os
 
-from model.enums.notification_type import NotificationType
+from model.enums.error_type import ErrorType
+from model.enums.notification_type import FuelNotificationType
 from utils.config_provider import PROJECT_ROOT_DIR
 
 
@@ -19,11 +20,15 @@ class DataService:
                 "accessToken": "",
                 "refreshToken": ""
             }
+            last_mail_date = {
+                ErrorType.READ_DATA_ERROR.value: "",
+                ErrorType.SAVE_DATA_ERROR.value: ""
+            }
             DataService.data_dict = {
                 "last_read_date": "",
                 "last_sms_date": "",
-                "last_mail_date": "",
-                "last_notification_type": NotificationType.OK_FUEL.value,
+                "last_mail_date": last_mail_date,
+                "last_notification_type": FuelNotificationType.OK_FUEL.value,
                 "last_fuel_level": 0,
                 "fuel_refill_dates": [],
                 "browser_storage": browser_storage,
@@ -52,20 +57,20 @@ class DataService:
     def set_last_sms_date(self, last_sms_date: str):
         DataService.data_dict["last_sms_date"] = last_sms_date
 
-    def get_last_notification_type(self) -> NotificationType | None:
+    def get_last_notification_type(self) -> FuelNotificationType | None:
         if "last_notification_type" in DataService.data_dict:
-            return NotificationType(DataService.data_dict["last_notification_type"])
+            return FuelNotificationType(DataService.data_dict["last_notification_type"])
         return None
 
-    def set_last_notification_type(self, notification_type: NotificationType):
+    def set_last_notification_type(self, notification_type: FuelNotificationType):
         DataService.data_dict["last_notification_type"] = notification_type.value
 
-    def get_last_mail_date(self) -> str | None:
+    def get_last_mail_date(self, error_type: ErrorType) -> str | None:
         if "last_mail_date" in DataService.data_dict:
-            return DataService.data_dict["last_mail_date"]
+            return DataService.data_dict["last_mail_date"][error_type.value]
 
-    def set_last_mail_date(self, last_mail_date: str):
-        DataService.data_dict["last_mail_date"] = last_mail_date
+    def set_last_mail_date(self, last_mail_date: str, error_type: ErrorType):
+        DataService.data_dict["last_mail_date"][error_type.value] = last_mail_date
 
     def get_last_fuel_level(self) -> int | None:
         if "last_fuel_level" in DataService.data_dict:
