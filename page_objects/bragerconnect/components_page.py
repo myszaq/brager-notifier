@@ -1,5 +1,6 @@
-from typing import override
 from seleniumbase import BaseCase
+from typing_extensions import override
+
 from utils import utils
 
 
