@@ -7,6 +7,7 @@ from pathlib import Path
 from smtplib import SMTPException
 
 import secrets
+from model.enums.error_type import ErrorType
 from services.data_service import DataService
 from utils import date_utils
 from utils.config_provider import ConfigProvider
@@ -19,17 +20,20 @@ class EmailService:
     mail_from: str = ConfigProvider.get_mailer_config_option("mail_from")
     mail_from_name: str = ConfigProvider.get_mailer_config_option("mail_from_name")
     recipients_list: list = ConfigProvider.get_mailer_config_option("recipients")
-    mail_subject: str = ConfigProvider.get_mailer_config_option("mail_subject")
-    fallback_message: str = ConfigProvider.get_mailer_config_option("fallback_message")
     smtp_host: str = ConfigProvider.get_mailer_config_option("smtp_host")
     smtp_port: int = ConfigProvider.get_mailer_config_option("smtp_port")
-    # time interval expressed in hours
-    error_email_time_interval: int = ConfigProvider.get_mailer_config_option("send_error_email_interval")
+    # time intervals expressed in hours
+    error_email_time_intervals: dict = ConfigProvider.get_mailer_config_option("send_error_email_intervals")
 
     def __init__(self):
+        self._error_type = None
         self._screenshot_path = None
         self._attachment_path = None
         self._error_log = None
+
+    def set_error_type(self, error_type: ErrorType):
+        self._error_type = error_type
+        return self
 
     def set_error_log(self, error_log: str):
         self._error_log = error_log
@@ -51,10 +55,10 @@ class EmailService:
         try:
             for recipient in self.recipients_list:
                 self._send_email_helper(recipient)
-            self.data_service.set_last_mail_date(date_utils.get_current_datetime())
+            self.data_service.set_last_mail_date(date_utils.get_current_datetime(), self._error_type)
             self.data_service.save_data_file()
-        except Exception:
-            logger.error("Sending notification email failed!")
+        except Exception as e:
+            logger.error("Sending notification email failed!", e, exc_info=True)
             pass
 
     # send actual email via smtplib
@@ -64,8 +68,8 @@ class EmailService:
         msg = EmailMessage()
         msg["From"] = self._build_from_address()
         msg["To"] = self._build_to_address(recipient)
-        msg["Subject"] = self.mail_subject
-        msg.set_content(self.fallback_message)
+        msg["Subject"] = email_template_config["mail_subject"][self._error_type]
+        msg.set_content(email_template_config["fallback_message"])
 
         image_cid = make_msgid(domain="brager.com")
         html_content = self._build_html_content(recipient, image_cid)
@@ -88,19 +92,20 @@ class EmailService:
             logger.error("Could not read attachment file! Exception: %s", e, exc_info=True)
 
         # open error screenshot file and embed it into html content
-        try:
-            with open(self._screenshot_path, "rb") as img:
-                msg.get_payload()[1].add_related(
-                    img.read(),
-                    maintype="image",
-                    subtype="png",
-                    cid=image_cid,
-                    filename="error_screenshot.png",
-                    disposition="inline"
-                )
-        except OSError as e:
-            logger.error("Could not read screenshot file! Exception: %s", e, exc_info=True)
-            raise
+        if self._screenshot_path is not None:
+            try:
+                with open(self._screenshot_path, "rb") as img:
+                    msg.get_payload()[1].add_related(
+                        img.read(),
+                        maintype="image",
+                        subtype="png",
+                        cid=image_cid,
+                        filename="error_screenshot.png",
+                        disposition="inline"
+                    )
+            except OSError as e:
+                logger.error("Could not read screenshot file! Exception: %s", e, exc_info=True)
+                raise
 
         smtp_username = base64.b64decode(secrets.smtp_username).decode("utf-8")
         smtp_password = base64.b64decode(secrets.smtp_password).decode("utf-8")
@@ -119,13 +124,13 @@ class EmailService:
         logger.info("Notification email has been successfully sent.")
 
     def _should_send_email(self) -> bool:
-        last_mail_date = self.data_service.get_last_mail_date()
+        last_mail_date = self.data_service.get_last_mail_date(self._error_type)
         if not last_mail_date:
             return True
 
         raw_time_delta = date_utils.get_time_difference(last_mail_date, date_utils.get_current_datetime())
         time_delta_hours = raw_time_delta / (60 * 60)
-        if time_delta_hours >= self.error_email_time_interval:
+        if time_delta_hours >= self.error_email_time_intervals[self._error_type]:
             return True
 
         return False
@@ -147,7 +152,22 @@ class EmailService:
             raise
 
         html_content = html_content.replace("${user_name}", recipient["hello_name"])
+        html_content = html_content.replace("${error_info}", email_template_config["error_info"][self._error_type])
         html_content = html_content.replace("${log_message}", self._error_log)
         html_content = html_content.replace("${error_screenshot_src}", f"cid:{image_cid[1:-1]}")
+        html_content = html_content.replace("${img_display_style}", "block" if self._screenshot_path is not None else "none")
 
         return html_content
+
+
+email_template_config = {
+    "fallback_message": "Przepraszamy! Ta wiadomość jest w formacie HTML, ale Twój klient pocztowy niestety jego nie obsługuje.",
+    "mail_subject": {
+        ErrorType.READ_DATA_ERROR: "[BragerOne] Błąd pobierania danych z aplikacji",
+        ErrorType.SAVE_DATA_ERROR: "[BragerOne] Błąd zapisu danych z aplikacji"
+    },
+    "error_info": {
+        ErrorType.READ_DATA_ERROR: "Niestety w trakcie ostatniego pobierania danych z aplikacji Brager One wystąpił błąd.",
+        ErrorType.SAVE_DATA_ERROR: "Niestety w trakcie ostatniego zapisu danych do bazy z aplikacji Brager One wystąpił błąd."
+    }
+}
