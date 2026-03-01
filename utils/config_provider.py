@@ -17,16 +17,20 @@ class ConfigProvider:
 
     @staticmethod
     def get_brager_config_option(option_name: str) -> Any:
-        return ConfigProvider.get_config_option("Brager", option_name)
+        return ConfigProvider._get_config_option("Brager", option_name)
 
     @staticmethod
     def get_router_config_option(option_name: str) -> Any:
-        return ConfigProvider.get_config_option("Router", option_name)
+        return ConfigProvider._get_config_option("Router", option_name)
 
     @staticmethod
     def get_mailer_config_option(option_name: str) -> Any:
-        return ConfigProvider.get_config_option("Mailer", option_name)
+        return ConfigProvider._get_config_option("Mailer", option_name)
 
     @staticmethod
-    def get_config_option(section: str, option_name: str) -> Any:
+    def get_database_config_option(option_name: str) -> Any:
+        return ConfigProvider._get_config_option("Database", option_name)
+
+    @staticmethod
+    def _get_config_option(section: str, option_name: str) -> Any:
         return ConfigProvider.config[section][option_name]
