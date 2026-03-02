@@ -35,7 +35,7 @@ class BragerService:
 
     def collect_device_data(self) -> DeviceData:
         logger.info("Connecting to BragerOne application.")
-        with SB(browser="chrome", maximize=True, headless=False) as sb:
+        with SB(browser="chrome", maximize=True, headless=True) as sb:
             # actual timeout will be twice as much (30 seconds) due to the retry in SeleniumBase
             sb.driver.set_page_load_timeout(15)
 

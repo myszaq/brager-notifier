@@ -63,7 +63,7 @@ class EmailService:
 
     # send actual email via smtplib
     def _send_email_helper(self, recipient: dict):
-        logger.info(f"Sending notification email to {recipient["email"]}...")
+        logger.info(f"Sending notification email to {recipient['email']}...")
 
         msg = EmailMessage()
         msg["From"] = self._build_from_address()
