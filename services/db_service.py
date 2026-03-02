@@ -41,7 +41,7 @@ class DBService:
             if previous_fuel_level is not None:
                 self._save_fuel_refill(measurement_id, previous_fuel_level)
             self.conn.commit()
-            logger.debug("Device data has been successfully stored in the database. Measurement id: %d", measurement_id)
+            logger.info("Device data has been successfully stored in the database. Measurement id: %d", measurement_id)
         except mariadb.Error as e:
             logger.error("Could not save device data into database! Exception: %s", e, exc_info=True)
             if self.conn:
