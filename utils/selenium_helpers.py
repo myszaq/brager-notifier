@@ -1,6 +1,6 @@
 from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as conditions
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
 
@@ -32,7 +32,7 @@ class SeleniumHelpers:
         actual_by = by or self._detect_selector_type(selector)
 
         return WebDriverWait(self.driver, actual_timeout).until(
-            conditions.visibility_of_element_located((actual_by, selector))
+            ec.visibility_of_element_located((actual_by, selector))
         )
 
     def wait_for_element_not_visible(self, selector: str, by=None, timeout=None):
@@ -52,7 +52,7 @@ class SeleniumHelpers:
         actual_by = by or self._detect_selector_type(selector)
 
         return WebDriverWait(self.driver, actual_timeout).until(
-            conditions.invisibility_of_element_located((actual_by, selector))
+            ec.invisibility_of_element_located((actual_by, selector))
         )
 
     def wait_for_element_not_present(self, selector: str, by=None, timeout=None):
@@ -94,7 +94,7 @@ class SeleniumHelpers:
 
         if selector:
             return WebDriverWait(self.driver, actual_timeout).until(
-                conditions.text_to_be_present_in_element((actual_by, selector), text)
+                ec.text_to_be_present_in_element((actual_by, selector), text)
             )
         else:
             return WebDriverWait(self.driver, actual_timeout).until(
@@ -114,7 +114,7 @@ class SeleniumHelpers:
 
         # Wait until the element is clickable
         WebDriverWait(self.driver, self.timeout).until(
-            conditions.element_to_be_clickable((actual_by, selector))
+            ec.element_to_be_clickable((actual_by, selector))
         )
 
         element.click()
@@ -165,7 +165,7 @@ class SeleniumHelpers:
         actual_timeout = timeout or self.timeout
         actual_by = by or self._detect_selector_type(selector)
         element = WebDriverWait(self.driver, actual_timeout).until(
-            conditions.visibility_of_element_located((actual_by, selector))
+            ec.visibility_of_element_located((actual_by, selector))
         )
 
         return element.get_attribute(attribute_name)
@@ -219,7 +219,7 @@ class SeleniumHelpers:
             if selector:
                 actual_by = by or self._detect_selector_type(selector)
                 WebDriverWait(self.driver, actual_timeout).until(
-                    conditions.text_to_be_present_in_element((actual_by, selector), text)
+                    ec.text_to_be_present_in_element((actual_by, selector), text)
                 )
             else:
                 WebDriverWait(self.driver, actual_timeout).until(
