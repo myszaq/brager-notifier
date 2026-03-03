@@ -16,6 +16,10 @@ class ConfigProvider:
             print("Could not load main configuration file!", e)
 
     @staticmethod
+    def get_browser_config_option(option_name: str) -> Any:
+        return ConfigProvider._get_config_option("Browser", option_name)
+
+    @staticmethod
     def get_brager_config_option(option_name: str) -> Any:
         return ConfigProvider._get_config_option("Brager", option_name)
 
