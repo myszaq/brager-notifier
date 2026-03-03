@@ -1,5 +1,7 @@
-from seleniumbase import BaseCase
+from services.browser_client import BrowserClient
 from utils.logger import logger
+from utils.selenium_helpers import SeleniumHelpers
+
 
 class SmsPage:
     sms_container: str = "#sms_page"
@@ -16,30 +18,34 @@ class SmsPage:
     sending_message: str = "Wysyłanie wiadomości SMS"
     success_message: str = "Wysyłanie wiadomości powiodło się"
 
-    def open_sms_view(self, sb: BaseCase):
-        if sb.is_element_visible(self.sms_container):
+    def __init__(self, browser_client: BrowserClient):
+        self.browser = browser_client
+        self.sh = SeleniumHelpers(self.browser.driver)
+
+    def open_sms_view(self):
+        if self.sh.is_element_visible(self.sms_container):
             return
-        sb.click(self.sms_menu_button)
-        sb.assert_text_visible(self.messages_header)
+        self.sh.click(self.sms_menu_button)
+        self.sh.assert_text_visible(self.messages_header)
 
-    def reload_page(self, sb: BaseCase):
-        sb.refresh_page()
-        sb.wait_for_text(self.messages_header)
+    def reload_page(self):
+        self.sh.refresh_page()
+        self.sh.wait_for_text_visible(self.messages_header)
 
-    def compose_sms(self, sb: BaseCase, recipients: str, content: str) -> bool:
-        self.prepare_sms(sb, recipients, content)
+    def compose_sms(self, recipients: str, content: str) -> bool:
+        self._prepare_sms(recipients, content)
 
-        if sb.is_element_visible(self.sms_error_container):
-            error_msg = sb.get_text(self.sms_error_container)
+        if self.sh.is_element_visible(self.sms_error_container):
+            error_msg = self.sh.get_text(self.sms_error_container)
             raise RuntimeError(f"Could not send the sms to recipients: {recipients}! Error message: {error_msg}")
-        self.send_sms(sb)
+        self._send_sms()
 
-        sb.wait_for_element(self.loading_dialog)
-        sb.wait_for_text(self.sending_message, self.loading_dialog)
-        sb.wait_for_text(self.attempts_message, self.loading_dialog, timeout=90)
+        self.sh.wait_for_element_visible(self.loading_dialog)
+        self.sh.wait_for_text_visible(self.sending_message, self.loading_dialog)
+        self.sh.wait_for_text_visible(self.attempts_message, self.loading_dialog, timeout=90)
 
-        status_message = sb.get_text(self.loading_dialog)
-        sb.wait_for_element_not_visible(self.loading_dialog)
+        status_message = self.sh.get_text(self.loading_dialog)
+        self.sh.wait_for_element_not_visible(self.loading_dialog)
 
         if self.success_message in status_message:
             return True
@@ -47,12 +53,12 @@ class SmsPage:
             logger.error(f"An error message occurred while trying to send the sms: {status_message}.")
             return False
 
-    def prepare_sms(self, sb: BaseCase, recipients: str, content: str):
-        sb.click(self.new_sms_button)
-        sb.wait_for_element(self.recipient_field)
-        sb.wait_for_element(self.sms_content_field)
-        sb.type(self.recipient_field, recipients)
-        sb.type(self.sms_content_field, content)
+    def _prepare_sms(self, recipients: str, content: str):
+        self.sh.click(self.new_sms_button)
+        self.sh.wait_for_element_visible(self.recipient_field)
+        self.sh.wait_for_element_visible(self.sms_content_field)
+        self.sh.type(self.recipient_field, recipients)
+        self.sh.type(self.sms_content_field, content)
 
-    def send_sms(self, sb: BaseCase):
-        sb.click(self.send_sms_button)
+    def _send_sms(self):
+        self.sh.click(self.send_sms_button)

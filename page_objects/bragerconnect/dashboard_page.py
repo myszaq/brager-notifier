@@ -1,5 +1,6 @@
-from seleniumbase import BaseCase
+from services.browser_client import BrowserClient
 from utils import utils
+from utils.selenium_helpers import SeleniumHelpers
 
 
 class DashboardPage:
@@ -20,54 +21,58 @@ class DashboardPage:
     flame_brightness_container: str = "//p[text()='Jasność płomienia']/../following-sibling::div//p"
     blower_efficiency_container: str = "//p[text()='Wydajność dmuchawy']/../following-sibling::div//p"
 
-    def wait_for_dashboard_loaded(self, sb: BaseCase, module_name: str) -> bool:
-        sb.wait_for_element(self.main_panel_link, timeout=20)
-        sb.assert_text_visible(module_name, self.card_title)
-        return sb.is_element_visible(self.card_title)
+    def __init__(self, browser_client: BrowserClient):
+        self.browser = browser_client
+        self.sh = SeleniumHelpers(self.browser.driver)
 
-    def logout(self, sb: BaseCase):
-        sb.click(self.logout_link)
-        sb.wait_for_element(self.confirm_button)
-        sb.click(self.confirm_button)
+    def wait_for_dashboard_loaded(self, module_name: str) -> bool:
+        self.sh.wait_for_element_visible(self.main_panel_link, timeout=20)
+        self.sh.assert_text_visible(module_name, self.card_title)
+        return self.sh.is_element_visible(self.card_title)
 
-    def get_fuel_level(self, sb: BaseCase) -> int:
-        tooltip_id = sb.get_attribute(self.fuel_level_tooltip_container, "id")
-        fuel_level = sb.get_attribute(self.fuel_level_container.format(tooltip_id), "aria-valuenow")
+    def logout(self):
+        self.sh.click(self.logout_link)
+        self.sh.wait_for_element_visible(self.confirm_button)
+        self.sh.click(self.confirm_button)
+
+    def get_fuel_level(self) -> int:
+        tooltip_id = self.sh.get_attribute(self.fuel_level_tooltip_container, "id")
+        fuel_level = self.sh.get_attribute(self.fuel_level_container.format(tooltip_id), "aria-valuenow")
         return int(fuel_level)
 
-    def get_boiler_temperature(self, sb: BaseCase) -> float:
-        value = utils.get_raw_temperature(sb.get_text(self.boiler_temperature_container))
+    def get_boiler_temperature(self) -> float:
+        value = utils.get_raw_temperature(self.sh.get_text(self.boiler_temperature_container))
         return float(value)
 
-    def get_boiler_setting(self, sb: BaseCase) -> int:
-        value = utils.get_raw_temperature(sb.get_text(self.boiler_setting_container))
+    def get_boiler_setting(self) -> int:
+        value = utils.get_raw_temperature(self.sh.get_text(self.boiler_setting_container))
         return int(value)
 
-    def get_boiler_status(self, sb: BaseCase) -> str:
-        tooltip_id = sb.get_attribute(self.boiler_status_tooltip_container, "id")
-        return sb.get_text(self.boiler_status_container.format(tooltip_id))
+    def get_boiler_status(self) -> str:
+        tooltip_id = self.sh.get_attribute(self.boiler_status_tooltip_container, "id")
+        return self.sh.get_text(self.boiler_status_container.format(tooltip_id))
 
-    def get_boiler_pump_status(self, sb: BaseCase) -> str:
-        return sb.get_text(self.boiler_pump_status_container)
+    def get_boiler_pump_status(self) -> str:
+        return self.sh.get_text(self.boiler_pump_status_container)
 
-    def get_return_temperature(self, sb: BaseCase) -> float:
-        value = utils.get_raw_temperature(sb.get_text(self.return_temperature_container))
+    def get_return_temperature(self) -> float:
+        value = utils.get_raw_temperature(self.sh.get_text(self.return_temperature_container))
         return float(value)
 
-    def get_return_pump_status(self, sb: BaseCase) -> str:
-        return sb.get_text(self.return_pump_status_container)
+    def get_return_pump_status(self) -> str:
+        return self.sh.get_text(self.return_pump_status_container)
 
-    def get_burner_power(self, sb: BaseCase) -> float:
-        burner_power = sb.get_text(self.burner_power_container)
+    def get_burner_power(self) -> float:
+        burner_power = self.sh.get_text(self.burner_power_container)
         burner_power = burner_power.replace("kW", "")
         return float(burner_power)
 
-    def get_flame_brightness(self, sb: BaseCase) -> int:
-        flame_brightness = sb.get_text(self.flame_brightness_container)
+    def get_flame_brightness(self) -> int:
+        flame_brightness = self.sh.get_text(self.flame_brightness_container)
         flame_brightness = flame_brightness.replace("%", "")
         return int(flame_brightness)
 
-    def get_blower_efficiency(self, sb: BaseCase) -> int:
-        blower_efficiency = sb.get_text(self.blower_efficiency_container)
+    def get_blower_efficiency(self) -> int:
+        blower_efficiency = self.sh.get_text(self.blower_efficiency_container)
         blower_efficiency = blower_efficiency.replace("%", "")
         return int(blower_efficiency)

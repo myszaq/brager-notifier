@@ -1,4 +1,5 @@
-from seleniumbase import BaseCase
+from services.browser_client import BrowserClient
+from utils.selenium_helpers import SeleniumHelpers
 
 
 class LoginPage:
@@ -6,8 +7,12 @@ class LoginPage:
     login_button: str = "#login_btn"
     start_button: str = "#menu_top_home"
 
-    def login(self, sb: BaseCase, password: str):
-        sb.wait_for_element(self.login_button)
-        sb.type(self.password_field, password)
-        sb.click(self.login_button)
-        sb.wait_for_element_not_present(self.login_button)
+    def __init__(self, browser_client: BrowserClient):
+        self.browser = browser_client
+        self.sh = SeleniumHelpers(self.browser.driver)
+
+    def login(self, password: str):
+        self.sh.wait_for_element_visible(self.login_button)
+        self.sh.type(self.password_field, password)
+        self.sh.click(self.login_button)
+        self.sh.wait_for_element_not_present(self.login_button)

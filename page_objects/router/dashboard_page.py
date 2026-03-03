@@ -1,4 +1,5 @@
-from seleniumbase import BaseCase
+from services.browser_client import BrowserClient
+from utils.selenium_helpers import SeleniumHelpers
 
 
 class DashboardPage:
@@ -6,9 +7,13 @@ class DashboardPage:
     tools_button: str = "#menu_top_tools"
     logout_button: str = "#loginallowed_btn div"
 
-    def navigate_to_tools_menu(self, sb: BaseCase):
-        sb.wait_for_element(self.start_button)
-        sb.click(self.tools_button)
+    def __init__(self, browser_client: BrowserClient):
+        self.browser = browser_client
+        self.sh = SeleniumHelpers(self.browser.driver)
 
-    def logout(self, sb: BaseCase):
-        sb.click(self.logout_button)
+    def navigate_to_tools_menu(self):
+        self.sh.wait_for_element_visible(self.start_button)
+        self.sh.click(self.tools_button)
+
+    def logout(self):
+        self.sh.click(self.logout_button)

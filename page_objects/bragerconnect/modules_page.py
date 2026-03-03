@@ -1,4 +1,5 @@
-from seleniumbase import BaseCase
+from services.browser_client import BrowserClient
+from utils.selenium_helpers import SeleniumHelpers
 
 
 class ModulesPage:
@@ -7,10 +8,14 @@ class ModulesPage:
     default_component: str = "Kocioł"
     component_title_header: str = "div.iSideContent h2"
 
-    def open_components_page(self, sb: BaseCase):
-        sb.wait_for_element(self.modules_page_link, timeout=3)
-        sb.click(self.modules_page_link)
+    def __init__(self, browser_client: BrowserClient):
+        self.browser = browser_client
+        self.sh = SeleniumHelpers(self.browser.driver)
 
-        sb.wait_for_element(self.dev_id_container, timeout=3)
-        sb.click(self.dev_id_container)
-        sb.wait_for_text_visible(self.default_component, self.component_title_header, timeout=5)
+    def open_components_page(self):
+        self.sh.wait_for_element_visible(self.modules_page_link, timeout=3)
+        self.sh.click(self.modules_page_link)
+
+        self.sh.wait_for_element_visible(self.dev_id_container, timeout=3)
+        self.sh.click(self.dev_id_container)
+        self.sh.wait_for_text_visible(self.default_component, self.component_title_header, timeout=5)
