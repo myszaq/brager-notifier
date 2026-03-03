@@ -1,6 +1,5 @@
 from selenium.common.exceptions import ElementNotVisibleException
-
-from services.browser_client import BrowserClient
+from selenium.webdriver.remote.webdriver import WebDriver
 from utils.selenium_helpers import SeleniumHelpers
 
 
@@ -14,11 +13,11 @@ class LoginPage:
     next_button: str = "//button[contains(., 'Dalej')]"
     choose_object_dropdown: str = "//label[text()='Wybierz obiekt']/.."
     choose_object_dropdown2: str = "//label[text()='Wybierz obiekt']/../div[@class='v-field__input']"
-    choose_object_option: str = "div.v-list-item-title:contains('{0}')"
+    choose_object_option: str = "//div[contains(@class, 'v-list-item-title') and contains(text(), '{0}')]"
 
-    def __init__(self, browser_client: BrowserClient):
-        self.browser = browser_client
-        self.sh = SeleniumHelpers(self.browser.driver)
+    def __init__(self, driver: WebDriver):
+        self.driver = driver
+        self.sh = SeleniumHelpers(driver)
 
     def proceed_to_login(self):
         self.sh.wait_for_element_visible(self.login_button, timeout=10)

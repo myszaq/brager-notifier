@@ -1,4 +1,4 @@
-from services.browser_client import BrowserClient
+from selenium.webdriver.remote.webdriver import WebDriver
 from utils import utils
 from utils.selenium_helpers import SeleniumHelpers
 
@@ -21,9 +21,9 @@ class DashboardPage:
     flame_brightness_container: str = "//p[text()='Jasność płomienia']/../following-sibling::div//p"
     blower_efficiency_container: str = "//p[text()='Wydajność dmuchawy']/../following-sibling::div//p"
 
-    def __init__(self, browser_client: BrowserClient):
-        self.browser = browser_client
-        self.sh = SeleniumHelpers(self.browser.driver)
+    def __init__(self, driver: WebDriver):
+        self.driver = driver
+        self.sh = SeleniumHelpers(driver)
 
     def wait_for_dashboard_loaded(self, module_name: str) -> bool:
         self.sh.wait_for_element_visible(self.main_panel_link, timeout=20)

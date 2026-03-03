@@ -1,4 +1,4 @@
-from services.browser_client import BrowserClient
+from selenium.webdriver.remote.webdriver import WebDriver
 from utils.selenium_helpers import SeleniumHelpers
 
 
@@ -7,9 +7,9 @@ class DashboardPage:
     tools_button: str = "#menu_top_tools"
     logout_button: str = "#loginallowed_btn div"
 
-    def __init__(self, browser_client: BrowserClient):
-        self.browser = browser_client
-        self.sh = SeleniumHelpers(self.browser.driver)
+    def __init__(self, driver: WebDriver):
+        self.driver = driver
+        self.sh = SeleniumHelpers(driver)
 
     def navigate_to_tools_menu(self):
         self.sh.wait_for_element_visible(self.start_button)

@@ -1,4 +1,4 @@
-from services.browser_client import BrowserClient
+from selenium.webdriver.remote.webdriver import WebDriver
 from utils.logger import logger
 from utils.selenium_helpers import SeleniumHelpers
 
@@ -18,9 +18,9 @@ class SmsPage:
     sending_message: str = "Wysyłanie wiadomości SMS"
     success_message: str = "Wysyłanie wiadomości powiodło się"
 
-    def __init__(self, browser_client: BrowserClient):
-        self.browser = browser_client
-        self.sh = SeleniumHelpers(self.browser.driver)
+    def __init__(self, driver: WebDriver):
+        self.driver = driver
+        self.sh = SeleniumHelpers(driver)
 
     def open_sms_view(self):
         if self.sh.is_element_visible(self.sms_container):

@@ -1,18 +1,17 @@
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
-
-from services.browser_client import BrowserClient
 from utils.selenium_helpers import SeleniumHelpers
 
 
 class CommonPage:
     main_panel_link: str = "//div[@class='text'][contains(., 'Panel główny')]/.."
     login_button: str = "//button[contains(., 'Zaloguj')]"
-    status_container = "div[role='status']"
+    status_container: str = "div[role='status']"
 
-    def __init__(self, browser_client: BrowserClient):
-        self.browser = browser_client
-        self.sh = SeleniumHelpers(self.browser.driver)
+    def __init__(self, driver: WebDriver):
+        self.driver = driver
+        self.sh = SeleniumHelpers(driver)
 
     def is_main_page_loaded(self) -> bool:
         # noinspection PyBroadException
@@ -22,7 +21,7 @@ class CommonPage:
             return False
 
         try:
-            wait = WebDriverWait(self.browser.driver, timeout=10, poll_frequency=0.25)
+            wait = WebDriverWait(self.driver, timeout=10, poll_frequency=0.25)
             wait.until(lambda _: self.sh.is_element_visible(self.main_panel_link))
         except TimeoutException:
             pass

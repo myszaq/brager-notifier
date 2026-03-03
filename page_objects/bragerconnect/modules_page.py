@@ -1,16 +1,16 @@
-from services.browser_client import BrowserClient
+from selenium.webdriver.remote.webdriver import WebDriver
 from utils.selenium_helpers import SeleniumHelpers
 
 
 class ModulesPage:
-    modules_page_link = "a.iNavigationRecord[href$='modules']"
-    dev_id_container = "div.box span.title"
+    modules_page_link: str = "a.iNavigationRecord[href$='modules']"
+    dev_id_container: str = "div.box span.title"
     default_component: str = "Kocioł"
     component_title_header: str = "div.iSideContent h2"
 
-    def __init__(self, browser_client: BrowserClient):
-        self.browser = browser_client
-        self.sh = SeleniumHelpers(self.browser.driver)
+    def __init__(self, driver: WebDriver):
+        self.driver = driver
+        self.sh = SeleniumHelpers(driver)
 
     def open_components_page(self):
         self.sh.wait_for_element_visible(self.modules_page_link, timeout=3)

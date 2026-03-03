@@ -1,4 +1,4 @@
-from services.browser_client import BrowserClient
+from selenium.webdriver.remote.webdriver import WebDriver
 from utils.selenium_helpers import SeleniumHelpers
 
 
@@ -7,9 +7,9 @@ class LoginPage:
     login_button: str = "#login_btn"
     start_button: str = "#menu_top_home"
 
-    def __init__(self, browser_client: BrowserClient):
-        self.browser = browser_client
-        self.sh = SeleniumHelpers(self.browser.driver)
+    def __init__(self, driver: WebDriver):
+        self.driver = driver
+        self.sh = SeleniumHelpers(driver)
 
     def login(self, password: str):
         self.sh.wait_for_element_visible(self.login_button)

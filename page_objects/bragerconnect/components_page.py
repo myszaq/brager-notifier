@@ -1,6 +1,5 @@
+from selenium.webdriver.remote.webdriver import WebDriver
 from typing_extensions import override
-
-from services.browser_client import BrowserClient
 from utils import utils
 from utils.selenium_helpers import SeleniumHelpers
 
@@ -11,9 +10,9 @@ class ComponentsPage:
     switch_view_button: str = "div.iSideContent h2 + button"
     switch_view_icon: str = "i.mdi-view-column-outline, i.mdi-view-agenda-outline, i.mdi-format-columns"
 
-    def __init__(self, browser_client: BrowserClient):
-        self.browser = browser_client
-        self.sh = SeleniumHelpers(self.browser.driver)
+    def __init__(self, driver: WebDriver):
+        self.driver = driver
+        self.sh = SeleniumHelpers(driver)
 
         allowed_classes = ["mdi-view-agenda-outline", "mdi-format-columns"]
         self.sh.wait_for_element_visible(self.switch_view_button)
@@ -40,8 +39,8 @@ class BoilerPage(ComponentsPage):
     boiler_link: str = "a.iNavigationRecord[href$='boiler']"
     outdoor_temperature_container: str = "//p[text()='Temperatura zewnętrzna']/../following-sibling::div//p"
 
-    def __init__(self, browser_client: BrowserClient):
-        super().__init__(browser_client)
+    def __init__(self, driver: WebDriver):
+        super().__init__(driver)
         if not self._is_component_view_loaded():
             self.open_component()
 
@@ -60,8 +59,8 @@ class FeederPage(ComponentsPage):
     feeder_link: str = "a.iNavigationRecord[href$='feeder']"
     burned_fuel_amount_container: str = "//p[text()='Ilość spalonego paliwa']/../following-sibling::div//p"
 
-    def __init__(self, browser_client: BrowserClient):
-        super().__init__(browser_client)
+    def __init__(self, driver: WebDriver):
+        super().__init__(driver)
         if not self._is_component_view_loaded():
             self.open_component()
 
@@ -84,8 +83,8 @@ class DHWPage(ComponentsPage):
     dhw_operating_mode_container: str = "//p[text()='Tryb pracy CWU']/../following-sibling::div//p"
     dhw_pump_status_container: str = "//p[text()='Status pompy']/../following-sibling::div//p"
 
-    def __init__(self, browser_client: BrowserClient):
-        super().__init__(browser_client)
+    def __init__(self, driver: WebDriver):
+        super().__init__(driver)
         if not self._is_component_view_loaded():
             self.open_component()
 
@@ -115,8 +114,8 @@ class BurnerPage(ComponentsPage):
     burner_select_button: str = "//div[@class='v-list-item-title'][text()='Stan palnika']/../.."
     burned_fuel_in_24h_container: str = "//p[text()='Spalone paliwo przez 24h']/../following-sibling::div//p"
 
-    def __init__(self, browser_client: BrowserClient):
-        super().__init__(browser_client)
+    def __init__(self, driver: WebDriver):
+        super().__init__(driver)
         if not self._is_component_view_loaded():
             self.open_component()
 
@@ -143,8 +142,8 @@ class ValvePage(ComponentsPage):
     valve_operating_mode_container: str = "//p[text()='Tryb pracy zaworu 1']/../following-sibling::div//p"
     valve_pump_status_container: str = "//p[text()='Status pompy']/../following-sibling::div//p"
 
-    def __init__(self, browser_client: BrowserClient):
-        super().__init__(browser_client)
+    def __init__(self, driver: WebDriver):
+        super().__init__(driver)
         if not self._is_component_view_loaded():
             self.open_component()
 
