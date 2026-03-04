@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 class SeleniumHelpers:
     """
     Set of helper methods handling web elements, inspired by the methods of SeleniumBase.
+    Enhanced to give more informative exceptions when elements are not found or not visible.
     """
 
     def __init__(self, driver, timeout=10):
@@ -31,9 +32,12 @@ class SeleniumHelpers:
         actual_timeout = timeout or self.timeout
         actual_by = by or self._detect_selector_type(selector)
 
-        return WebDriverWait(self.driver, actual_timeout).until(
-            ec.visibility_of_element_located((actual_by, selector))
-        )
+        try:
+            return WebDriverWait(self.driver, actual_timeout).until(
+                ec.visibility_of_element_located((actual_by, selector))
+            )
+        except TimeoutException:
+            self._raise_timeout_with_info(selector, actual_timeout, "Element not visible.")
 
     def wait_for_element_not_visible(self, selector: str, by=None, timeout=None):
         """
@@ -51,9 +55,12 @@ class SeleniumHelpers:
         actual_timeout = timeout or self.timeout
         actual_by = by or self._detect_selector_type(selector)
 
-        return WebDriverWait(self.driver, actual_timeout).until(
-            ec.invisibility_of_element_located((actual_by, selector))
-        )
+        try:
+            return WebDriverWait(self.driver, actual_timeout).until(
+                ec.invisibility_of_element_located((actual_by, selector))
+            )
+        except TimeoutException:
+            self._raise_timeout_with_info(selector, actual_timeout, "Element still visible.")
 
     def wait_for_element_not_present(self, selector: str, by=None, timeout=None):
         """
@@ -74,9 +81,10 @@ class SeleniumHelpers:
             elements = driver.find_elements(actual_by, selector)
             return len(elements) == 0
 
-        return WebDriverWait(self.driver, actual_timeout).until(
-            element_not_present
-        )
+        try:
+            return WebDriverWait(self.driver, actual_timeout).until(element_not_present)
+        except TimeoutException:
+            self._raise_timeout_with_info(selector, actual_timeout, "Element still present in DOM.")
 
     def wait_for_text_visible(self, text: str, selector: str = None, by=None, timeout=None):
         """
@@ -91,15 +99,21 @@ class SeleniumHelpers:
         """
         actual_timeout = timeout or self.timeout
 
-        if selector:
-            actual_by = by or self._detect_selector_type(selector)
-            return WebDriverWait(self.driver, actual_timeout).until(
-                ec.text_to_be_present_in_element((actual_by, selector), text)
-            )
-        else:
-            return WebDriverWait(self.driver, actual_timeout).until(
-                lambda driver: text in driver.find_element(By.TAG_NAME, "body").text
-            )
+        try:
+            if selector:
+                actual_by = by or self._detect_selector_type(selector)
+                return WebDriverWait(self.driver, actual_timeout).until(
+                    ec.text_to_be_present_in_element((actual_by, selector), text)
+                )
+            else:
+                return WebDriverWait(self.driver, actual_timeout).until(
+                    lambda driver: text in driver.find_element(By.TAG_NAME, "body").text
+                )
+        except TimeoutException:
+            if selector:
+                raise TimeoutException(f"Timeout waiting for text '{text}' in element '{selector}' after {actual_timeout}s.")
+            else:
+                raise TimeoutException(f"Timeout waiting for text '{text}' on the page body after {actual_timeout}s.")
 
     def click(self, selector: str, by=None):
         """
@@ -112,10 +126,12 @@ class SeleniumHelpers:
         actual_by = by or self._detect_selector_type(selector)
         element = self.wait_for_element_visible(selector, actual_by)
 
-        # Wait until the element is clickable
-        WebDriverWait(self.driver, self.timeout).until(
-            ec.element_to_be_clickable((actual_by, selector))
-        )
+        try:
+            WebDriverWait(self.driver, self.timeout).until(
+                ec.element_to_be_clickable((actual_by, selector))
+            )
+        except TimeoutException:
+            self._raise_timeout_with_info(selector, self.timeout, "Element not clickable.")
 
         element.click()
         return element
@@ -135,9 +151,13 @@ class SeleniumHelpers:
         actual_by = by or self._detect_selector_type(selector)
         element = self.wait_for_element_visible(selector, actual_by, actual_timeout)
 
-        if clear_first:
-            element.clear()
-        element.send_keys(text)
+        try:
+            if clear_first:
+                element.clear()
+            element.send_keys(text)
+        except Exception as e:
+            raise Exception(f"Error typing into element '{selector}': {e}")
+
         return element
 
     def get_text(self, selector: str, by=None):
@@ -150,7 +170,10 @@ class SeleniumHelpers:
         """
         actual_by = by or self._detect_selector_type(selector)
         element = self.wait_for_element_visible(selector, actual_by)
-        return element.text
+        try:
+            return element.text
+        except Exception as e:
+            raise Exception(f"Error getting text from element '{selector}': {e}")
 
     def get_attribute(self, selector: str, attribute_name: str, by=None, timeout=None):
         """
@@ -164,11 +187,18 @@ class SeleniumHelpers:
         """
         actual_timeout = timeout or self.timeout
         actual_by = by or self._detect_selector_type(selector)
-        element = WebDriverWait(self.driver, actual_timeout).until(
-            ec.visibility_of_element_located((actual_by, selector))
-        )
 
-        return element.get_attribute(attribute_name)
+        try:
+            element = WebDriverWait(self.driver, actual_timeout).until(
+                ec.visibility_of_element_located((actual_by, selector))
+            )
+        except TimeoutException:
+            raise TimeoutException(f"Timeout waiting for element '{selector}' to get attribute '{attribute_name}' after {actual_timeout}s.")
+
+        try:
+            return element.get_attribute(attribute_name)
+        except Exception as e:
+            raise Exception(f"Error getting attribute '{attribute_name}' from element '{selector}': {e}")
 
     def execute_script(self, script, *args):
         """
@@ -227,9 +257,9 @@ class SeleniumHelpers:
                 )
         except TimeoutException:
             if selector:
-                raise AssertionError(f"Text '{text}' was not visible in element '{selector}' after {actual_timeout} seconds.")
+                raise AssertionError(f"Assertion failed: Text '{text}' was not visible in element '{selector}' after {actual_timeout}s.")
             else:
-                raise AssertionError(f"Text '{text}' was not visible on the page after {actual_timeout} seconds.")
+                raise AssertionError(f"Assertion failed: Text '{text}' was not visible on the page after {actual_timeout}s.")
 
     def save_screenshot(self, file_path: str) -> bool:
         """
@@ -240,9 +270,12 @@ class SeleniumHelpers:
         """
         return self.driver.save_screenshot(file_path)
 
+    def _raise_timeout_with_info(self, selector, timeout, extra=""):
+        raise TimeoutException(f"Timeout waiting for element: '{selector}' after {timeout}s. {extra}")
+
     def _detect_selector_type(self, selector: str):
-        xpath_indicators = ("//", "./", "(/")
-        if selector.startswith(xpath_indicators) or selector.startswith("("):
+        xpath_indicators = ("//", "./", "(")
+        if selector.startswith(xpath_indicators):
             return By.XPATH
 
         return By.CSS_SELECTOR
