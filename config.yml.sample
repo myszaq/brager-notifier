@@ -1,5 +1,9 @@
 # This is a sample of config.yml file which contains the configuration for the whole app. In order to use it you just need to create
 # the copy of this file under config.yml name and update recipients in Router section. Other parameters have their default values.
+Browser:
+  browser_name: "chrome"
+  driver_path: "C://{path_to_chromedriver}//chromedriver.exe"
+
 Brager:
   brager_url: "https://one.brager.pl/"
   user_object: "Dom"
