@@ -36,7 +36,7 @@ class BragerService:
 
     def collect_device_data(self) -> DeviceData:
         logger.info("Connecting to BragerOne application.")
-        with BrowserClient(headless=False) as client:
+        with BrowserClient(headless=True) as client:
             self._driver = client.driver
             self._dashboard_page = DashboardPage(client.driver)
             self._modules_page = ModulesPage(client.driver)
@@ -54,6 +54,7 @@ class BragerService:
                 login_service = LoginService(client)
                 login_service.brager_login()
                 self._dashboard_page.wait_for_dashboard_loaded(self.module_name)
+                logger.info("Reading device data from BragerOne application.")
                 self.fuel_level = self._dashboard_page.get_fuel_level()
                 self.boiler_status = self._dashboard_page.get_boiler_status()
                 self.boiler_temperature = self._dashboard_page.get_boiler_temperature()
