@@ -20,7 +20,7 @@ class LoginPage:
         self.sh = SeleniumHelpers(driver)
 
     def proceed_to_login(self):
-        self.sh.wait_for_element_visible(self.login_button, timeout=10)
+        self.sh.wait_for_element_visible(self.login_button, timeout=20)
         self.sh.click(self.login_button)
         self.sh.wait_for_text_visible("Zaloguj się", self.page_title, timeout=5)
 
