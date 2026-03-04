@@ -26,7 +26,6 @@ class RouterService:
             self._dashboard_page = DashboardPage(client.driver)
             self._sms_page = SmsPage(client.driver)
 
-            client.driver.maximize_window()
             client.driver.set_page_load_timeout(30)
             try:
                 client.open(self.page_url)

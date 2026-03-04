@@ -28,6 +28,8 @@ class BrowserClient:
             options = ChromeOptions()
             if self._headless:
                 options.add_argument("--headless=new")
+
+            options.add_argument("--window-size=1920,1080")
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
 
@@ -62,6 +64,8 @@ class BrowserClient:
         else:
             raise ValueError(f"Unsupported browser: {self._browser_name}")
 
+        if not self._headless:
+            self.driver.maximize_window()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

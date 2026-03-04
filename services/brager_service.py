@@ -42,7 +42,6 @@ class BragerService:
             self._modules_page = ModulesPage(client.driver)
             self.sh = SeleniumHelpers(client.driver)
 
-            client.driver.maximize_window()
             client.driver.set_page_load_timeout(30)
             try:
                 try:
