@@ -33,14 +33,15 @@ class BrowserClient:
             options.add_argument("--window-size=1920,1080")
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
+            options.add_argument("--lang=pl-PL")
+            options.add_argument("--disable-blink-features=AutomationControlled")
 
             # disable automation bar (what you already use)
             options.add_experimental_option("excludeSwitches", ["enable-automation"])
             options.add_experimental_option("useAutomationExtension", False)
-            options.add_argument("--disable-blink-features=AutomationControlled")
-
-            # disable password manager & save password popup
+            # disable password manager & save password popup, set proper browser language
             prefs = {
+                "intl.accept_languages": "pl,pl-PL",
                 "credentials_enable_service": False,
                 "profile.password_manager_enabled": False
             }
@@ -56,6 +57,7 @@ class BrowserClient:
             options = FirefoxOptions()
             if self._headless:
                 options.add_argument("--headless")
+            options.set_preference("intl.accept_languages", "pl,pl-PL")
             if self._binary_path:
                 options.binary_location = self._binary_path
             service = FirefoxService(self._driver_path) if self._driver_path else FirefoxService()
