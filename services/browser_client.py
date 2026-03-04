@@ -17,10 +17,11 @@ class BrowserClient:
     def refresh(self):
         self.driver.refresh()
 
-    def __init__(self, browser: str = None, driver_path: str = None, headless: bool = True):
+    def __init__(self, browser: str = None, headless: bool = True, driver_path: str = None, binary_path: str = None, ):
         self._browser_name = browser or ConfigProvider.get_browser_config_option("browser_name")
-        self._driver_path = driver_path or ConfigProvider.get_browser_config_option("driver_path")
         self._headless = headless
+        self._driver_path = driver_path or ConfigProvider.get_browser_config_option("driver_path")
+        self._binary_path = binary_path or ConfigProvider.get_browser_config_option("binary_path")
         self.driver = None
 
     def __enter__(self):
@@ -55,6 +56,8 @@ class BrowserClient:
             options = FirefoxOptions()
             if self._headless:
                 options.add_argument("--headless")
+            if self._binary_path:
+                options.binary_location = self._binary_path
             service = FirefoxService(self._driver_path) if self._driver_path else FirefoxService()
             try:
                 self.driver = webdriver.Firefox(service=service, options=options)
@@ -64,7 +67,9 @@ class BrowserClient:
         else:
             raise ValueError(f"Unsupported browser: {self._browser_name}")
 
-        if not self._headless:
+        if self._headless:
+            self.driver.set_window_size(1920, 1080)
+        else:
             self.driver.maximize_window()
         return self
 
