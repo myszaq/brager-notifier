@@ -2,7 +2,8 @@
 # the copy of this file under config.yml name and update recipients in Router section. Other parameters have their default values.
 Browser:
   browser_name: "chrome"
-  driver_path: "C://{path_to_chromedriver}//chromedriver.exe"
+  driver_path: "C:\\{path_to_chromedriver}\\chromedriver.exe"
+  binary_path: "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
 
 Brager:
   brager_url: "https://one.brager.pl/"
