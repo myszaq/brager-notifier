@@ -91,7 +91,7 @@ class NotificationService:
             low_fuel_message = low_fuel_message_tpl.format(
                 recipient["name"], notification_data.fuel_level, notification_data.boiler_temperature, notification_data.boiler_status
             )
-            self.router_service.execute(low_fuel_message, recipient["phone_number"])
+            self.router_service.send_message(low_fuel_message, recipient["phone_number"])
 
     def _send_critical_fuel_level_message(self, notification_data: NotificationData):
         logger.info(f"Detected critical fuel level: {notification_data.fuel_level}%! A corresponding message will be sent.")
@@ -100,7 +100,7 @@ class NotificationService:
             critical_fuel_message = critical_fuel_message_tpl.format(
                 recipient["name"], notification_data.fuel_level, notification_data.boiler_temperature, notification_data.boiler_status
             )
-            self.router_service.execute(critical_fuel_message, recipient["phone_number"])
+            self.router_service.send_message(critical_fuel_message, recipient["phone_number"])
 
     def _send_full_fuel_level_message(self, notification_data: NotificationData):
         logger.info("Detected recent fuel refill. A corresponding message will be sent.")
@@ -109,4 +109,4 @@ class NotificationService:
             critical_fuel_message = full_fuel_message_tpl.format(
                 recipient["name"], notification_data.boiler_temperature, notification_data.boiler_status
             )
-            self.router_service.execute(critical_fuel_message, recipient["phone_number"])
+            self.router_service.send_message(critical_fuel_message, recipient["phone_number"])
