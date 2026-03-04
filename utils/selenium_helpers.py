@@ -90,9 +90,9 @@ class SeleniumHelpers:
         :return: True once the text is visible
         """
         actual_timeout = timeout or self.timeout
-        actual_by = by or self._detect_selector_type(selector)
 
         if selector:
+            actual_by = by or self._detect_selector_type(selector)
             return WebDriverWait(self.driver, actual_timeout).until(
                 ec.text_to_be_present_in_element((actual_by, selector), text)
             )
