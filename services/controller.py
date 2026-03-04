@@ -10,7 +10,6 @@ from services.app_data_service import AppDataService
 from services.db_service import DBService
 from services.email_service import EmailService
 from services.notification_service import NotificationService
-from services.router_service import RouterService
 from utils import date_utils
 from utils.config_provider import ConfigProvider
 from utils.logger import logger
@@ -25,7 +24,6 @@ class BragerData:
 
 class Controller:
     brager_service = BragerService()
-    router_service = RouterService()
     data_service = AppDataService()
     db_service = DBService()
 
