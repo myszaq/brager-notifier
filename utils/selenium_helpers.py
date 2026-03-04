@@ -1,4 +1,4 @@
-from selenium.common import TimeoutException
+from selenium.common import NoSuchElementException, StaleElementReferenceException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
@@ -187,20 +187,20 @@ class SeleniumHelpers:
         """
         self.driver.refresh()
 
-    def is_element_visible(self, selector: str, by=None):
+    def is_element_visible(self, selector: str, by=None) -> bool:
         """
-        Check if the element is visible on the page.
+        Check if the element is currently visible on the page.
 
         :param selector: Element selector (CSS or XPath)
         :param by: Optional selector type (auto-detected if None)
         :return: True if the element is visible, False otherwise
         """
         actual_by = by or self._detect_selector_type(selector)
-        # noinspection PyBroadException
+
         try:
-            self.wait_for_element_visible(selector, actual_by)
-            return True
-        except Exception:
+            element = self.driver.find_element(actual_by, selector)
+            return element.is_displayed()
+        except (NoSuchElementException, StaleElementReferenceException):
             return False
 
     def assert_text_visible(self, text: str, selector: str = None, by=None, timeout=None):
