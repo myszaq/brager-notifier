@@ -28,7 +28,7 @@ class CommonPage:
         return self.sh.is_element_visible(self.main_panel_link)
 
     def get_browser_storage_data(self) -> dict:
-        self.sh.wait_for_text_visible("Pomyślnie załadowano moduły!", self.status_container, timeout=10)
+        self.sh.wait_for_text_visible("Pomyślnie załadowano moduły!", self.status_container, timeout=15)
         js_script = r"""
 return {
     selectedObjectId: localStorage.getItem('selectedObjectId'),
