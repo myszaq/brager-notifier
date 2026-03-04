@@ -231,6 +231,15 @@ class SeleniumHelpers:
             else:
                 raise AssertionError(f"Text '{text}' was not visible on the page after {actual_timeout} seconds.")
 
+    def save_screenshot(self, file_path: str) -> bool:
+        """
+        Saves a screenshot of the current browser window.
+
+        :param file_path: Path to the output file (e.g., "screenshots/error.png")
+        :return: True if the screenshot was saved successfully, False otherwise.
+        """
+        return self.driver.save_screenshot(file_path)
+
     def _detect_selector_type(self, selector: str):
         xpath_indicators = ("//", "./", "(/")
         if selector.startswith(xpath_indicators) or selector.startswith("("):
