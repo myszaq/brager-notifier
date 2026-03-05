@@ -16,17 +16,17 @@ Brager:
     Witaj {0}! Poziom paliwa w zasobniku kotła spadł do {1}%! Uzupełnij proszę pellet jak najszybciej.
     Temperatura kotła: {2}°C
     Status kotła: {3}
-    BragerReportingTool v.1.2.
+    BragerReportingTool v.1.5.
   critical_fuel_level_message: |
     Witaj {0}! Zostało tylko {1}% paliwa w zasobniku! Musisz natychmiast uzupełnić pellet, w przeciwnym razie dojdzie do zatrzymania pracy kotła.
     Temperatura kotła: {2}°C
     Status kotła: {3}
-    BragerReportingTool v.1.2.
+    BragerReportingTool v.1.5.
   full_fuel_level_message: |
     Witaj {0}! Gratuluję, wygląda na to, że poziom pelletu został niedawno uzupełniony do 100%. Nic nie musisz robić :)
     Temperatura kotła: {1}°C
     Status kotła: {2}
-    BragerReportingTool v.1.2.
+    BragerReportingTool v.1.5.
 Router:
   router_url: "http://192.168.8.1/html/index.html"
   recipients:
