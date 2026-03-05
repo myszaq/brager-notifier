@@ -72,7 +72,11 @@ class BragerService:
                 dhw_data = self._get_dhw_data()
                 fuel_data = self._get_remaining_fuel_data(fuel_data)
 
-                self._dashboard_page.logout()
+                # do not break collecting data if there was an error during log out
+                try:
+                    self._dashboard_page.logout()
+                except Exception as e:
+                    logger.error(f"Logging out from the application failed! Exception: %s", e)
 
                 logger.info("Device data has been read and collected successfully.")
                 return DeviceData(
