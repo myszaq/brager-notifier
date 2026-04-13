@@ -13,6 +13,7 @@ from page_objects.bragerconnect.dashboard_page import DashboardPage
 from page_objects.bragerconnect.modules_page import ModulesPage
 from services.browser_client import BrowserClient
 from services.login_service import LoginService
+from utils import utils
 from utils.config_provider import ConfigProvider
 from utils.logger import logger
 from utils.selenium_helpers import SeleniumHelpers
@@ -65,7 +66,7 @@ class BragerService:
                 fuel_data = self._get_basic_fuel_data()
 
                 # the remaining data require opening specific components pages
-                self._modules_page.open_components_page()
+                utils.run_method_with_retry(self._modules_page.open_components_page, on_retry=self.sh.refresh_page)
 
                 boiler_data = self._get_remaining_boiler_data(boiler_data)
                 valve_data = self._get_valve_data()
