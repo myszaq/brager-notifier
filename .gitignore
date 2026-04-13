@@ -2,9 +2,9 @@
 /shelf/
 /workspace.xml
 /.idea/
+/.venv/
 __pycache__
-/logs/app_execution.log
-/logs/error_screenshot.png
+/logs/*
 secrets.py
 config.yml
 /data/persistence.json
