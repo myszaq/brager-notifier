@@ -5,7 +5,7 @@ from utils.selenium_helpers import SeleniumHelpers
 class ModulesPage:
     modules_page_link: str = "a.iNavigationRecord[href$='modules']"
     dev_id_container: str = "div.box span.title"
-    default_component: str = "Kocioł"
+    default_component: str = "Ustawienia kotła"
     component_title_header: str = "div.iSideContent h2"
 
     def __init__(self, driver: WebDriver):

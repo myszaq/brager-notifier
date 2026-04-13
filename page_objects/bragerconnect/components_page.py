@@ -35,7 +35,7 @@ class ComponentsPage:
 
 
 class BoilerPage(ComponentsPage):
-    component_name: str = "Kocioł"
+    component_name: str = "Ustawienia kotła"
     boiler_link: str = "a.iNavigationRecord[href$='boiler']"
     outdoor_temperature_container: str = "//p[text()='Temperatura zewnętrzna']/../following-sibling::div//p"
 
@@ -76,7 +76,7 @@ class FeederPage(ComponentsPage):
 
 
 class DHWPage(ComponentsPage):
-    component_name: str = "CWU"
+    component_name: str = "Menu CWU"
     dhw_link: str = "a.iNavigationRecord[href$='dhw']"
     dhw_temperature_container: str = "//p[text()='Temperatura CWU']/../following-sibling::div//p"
     dhw_setting_container: str = "//p[text()='Nastawa cwu']/../following-sibling::div//p"
@@ -134,9 +134,9 @@ class BurnerPage(ComponentsPage):
 
 
 class ValvePage(ComponentsPage):
-    component_name: str = "Zawór 1"
+    component_name: str = "Zawór mieszający 1"
     valves_link_section: str = "//div[@class='iNavigationRecord']/div[contains(text(),'Zawory')]"
-    valve1_select_button: str = "//div[@class='v-list-item-title'][text()='Zawór 1']/../.."
+    valve1_select_button: str = "//div[@class='v-list-item-title'][text()='Zawór mieszający 1']/../.."
     valve_temperature_container: str = "//p[text()='Temperatura zaworu 1']/../following-sibling::div//p"
     valve_setting_container: str = "//p[text()='Nastawa zaworu 1']/../following-sibling::div//p"
     valve_operating_mode_container: str = "//p[text()='Tryb pracy zaworu 1']/../following-sibling::div//p"
