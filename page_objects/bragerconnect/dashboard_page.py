@@ -26,7 +26,10 @@ class DashboardPage:
         self.sh = SeleniumHelpers(driver)
 
     def wait_for_dashboard_loaded(self, module_name: str) -> bool:
-        self.sh.wait_for_element_visible(self.main_panel_link, timeout=20)
+        self.sh.wait_for_element_visible(self.main_panel_link, timeout=15)
+        if not self.sh.is_element_visible(self.card_title):
+            self.sh.refresh_page()
+
         self.sh.assert_text_visible(module_name, self.card_title)
         return self.sh.is_element_visible(self.card_title)
 
