@@ -21,10 +21,14 @@ class CommonPage:
             return False
 
         try:
-            wait = WebDriverWait(self.driver, timeout=10, poll_frequency=0.25)
-            wait.until(lambda _: self.sh.is_element_visible(self.main_panel_link))
+            wait = WebDriverWait(self.driver, timeout=12, poll_frequency=0.25)
+            wait.until(lambda _: self.is_main_panel_visible())
         except TimeoutException:
             pass
+
+        return self.is_main_panel_visible()
+
+    def is_main_panel_visible(self) -> bool:
         return self.sh.is_element_visible(self.main_panel_link)
 
     def get_browser_storage_data(self) -> dict:
