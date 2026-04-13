@@ -1,3 +1,5 @@
+import time
+
 from selenium.common import NoSuchElementException, StaleElementReferenceException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
@@ -115,6 +117,33 @@ class SeleniumHelpers:
             else:
                 raise TimeoutException(f"Timeout waiting for text '{text}' on the page body after {actual_timeout}s.")
 
+    def wait_for_page_load_complete(self, timeout=15, stable_time=0.5):
+        """
+       Waits until the page is fully loaded and stabilized.
+       The method first waits for document.readyState to be "complete".
+       Then it performs an additional stabilization check by comparing
+       the page source over time to ensure the DOM is no longer changing.
+
+       :param timeout: Maximum time (in seconds) to wait for the page to load and stabilize. Default is 15.
+       :param stable_time: Time interval (in seconds) between DOM stability checks. Default is 0.5.
+       :raises TimeoutException: If the page does not stabilize within the given timeout.
+       :return: None
+       """
+        WebDriverWait(self.driver, timeout).until(
+            lambda d: d.execute_script("return document.readyState") == "complete"
+        )
+
+        # additional stabilization (as in SeleniumBase retry)
+        last_html = self.driver.page_source
+        start_time = time.time()
+
+        while time.time() - start_time < timeout:
+            time.sleep(stable_time)
+            new_html = self.driver.page_source
+            if new_html == last_html:
+                return
+            last_html = new_html
+
     def click(self, selector: str, by=None):
         """
         Wait until the element is visible and clickable, then click it.
@@ -210,12 +239,15 @@ class SeleniumHelpers:
         """
         return self.driver.execute_script(script, *args)
 
-    def refresh_page(self):
+    def refresh_page(self, timeout: int = 15):
         """
         Refresh the current page.
         Equivalent of SB's sb.refresh_page().
+
+        :param timeout: Maximum time (in seconds) to wait for the page to reload and stabilize. Defaults to 15 seconds.
         """
         self.driver.refresh()
+        self.wait_for_page_load_complete(timeout)
 
     def is_element_visible(self, selector: str, by=None) -> bool:
         """
