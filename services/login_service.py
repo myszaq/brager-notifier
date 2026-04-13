@@ -42,6 +42,9 @@ class LoginService:
             self._save_browser_storage_data()
 
     def _login(self):
+        if self._common_page.is_main_panel_visible():
+            return
+
         try:
             self._login_page.proceed_to_login()
             self._login_page.login_user(self.email, self.password)
