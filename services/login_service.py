@@ -8,7 +8,7 @@ from services.browser_client import BrowserClient
 from utils.config_provider import ConfigProvider
 from utils.logger import logger
 from utils.selenium_helpers import SeleniumHelpers
-
+from utils import utils
 
 class LoginService:
     data_service = AppDataService()
@@ -24,6 +24,7 @@ class LoginService:
         self._sh = SeleniumHelpers(browser.driver)
 
     def brager_login(self):
+        utils.run_method_with_retry(self._login_page.wait_for_login_page, on_retry=self._sh.refresh_page)
         current_browser_storage = self.data_service.get_browser_storage()
         if current_browser_storage:
             self._common_page.set_browser_storage_data(current_browser_storage)
