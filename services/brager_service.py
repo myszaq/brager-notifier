@@ -52,7 +52,7 @@ class BragerService:
                     raise
 
                 login_service = LoginService(client)
-                login_service.brager_login()
+                utils.run_method_with_retry(login_service.brager_login, on_retry=self.sh.refresh_page)
                 self._dashboard_page.wait_for_dashboard_loaded(self.module_name)
                 logger.info("Reading device data from BragerOne application.")
                 self.fuel_level = self._dashboard_page.get_fuel_level()
