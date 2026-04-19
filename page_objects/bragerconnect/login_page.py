@@ -4,6 +4,7 @@ from utils.selenium_helpers import SeleniumHelpers
 
 
 class LoginPage:
+    brager_logo: str = "div.tw-relative svg"
     page_title: str = "h1.pageTitle"
     email_container: str = "//input[@id='input-v-3']/.."
     email_field: str = "#input-v-3"
@@ -19,8 +20,12 @@ class LoginPage:
         self.driver = driver
         self.sh = SeleniumHelpers(driver)
 
+    def wait_for_login_page(self):
+        self.sh.wait_for_element_visible(self.brager_logo, timeout=10)
+        self.sh.wait_for_element_visible(self.login_button, timeout=10)
+
     def proceed_to_login(self):
-        self.sh.wait_for_element_visible(self.login_button, timeout=15)
+        self.wait_for_login_page()
         self.sh.click(self.login_button)
         self.sh.wait_for_text_visible("Zaloguj się", self.page_title, timeout=5)
 
