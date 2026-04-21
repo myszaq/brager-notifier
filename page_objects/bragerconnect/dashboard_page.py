@@ -28,12 +28,12 @@ class DashboardPage:
         self.sh = SeleniumHelpers(driver)
 
     def wait_for_dashboard_loaded(self, module_name: str):
-        self.sh.wait_for_element_visible(self.main_panel_link, timeout=15)
+        self.sh.wait_for_element_visible(self.main_panel_link, timeout=12)
         if not self.sh.is_element_visible(self.card_title):
             self.sh.refresh_page()
 
         self.sh.assert_text_visible(module_name, self.card_title)
-        self.sh.wait_for_text_visible("Pomyślnie załadowano moduły!", self.status_container, timeout=15)
+        self.sh.wait_for_text_visible("Pomyślnie załadowano moduły!", self.status_container, timeout=10)
         self.sh.wait_for_element_visible(self.dashboard_container, timeout=5)
 
     def logout(self):
