@@ -53,11 +53,8 @@ class BragerService:
 
                 login_service = LoginService(client)
                 utils.run_method_with_retry(login_service.brager_login, on_retry=self.sh.refresh_page)
-                self._dashboard_page.wait_for_dashboard_loaded(self.module_name)
+                utils.run_method_with_retry(self._dashboard_page.wait_for_dashboard_loaded, self.module_name, on_retry=self.sh.refresh_page)
                 logger.info("Reading device data from BragerOne application.")
-                self.fuel_level = self._dashboard_page.get_fuel_level()
-                self.boiler_status = self._dashboard_page.get_boiler_status()
-                self.boiler_temperature = self._dashboard_page.get_boiler_temperature()
 
                 # collect available data from the dashboard
                 boiler_data = self._get_basic_boiler_data()
